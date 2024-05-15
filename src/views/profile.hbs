@@ -22,16 +22,26 @@
 
         <h1 class="font-bold text-xl">Profile</h1>
         <div class="p-4 border-2 border-blue-800 space-y-2">
-                <p>Your Email: {{finduser.email}}</p>
-                <p>Your phone: {{finduser.buyerphone}}</p>
-                <p> Package Name: {{finduser.package}}</p>
-                <p>Investment: {{finduser.investment}}</p>
 
-                <p>Date package buyed: {{finduser.date}}</p>
-        
+            {{#if packagedetails}}
+            <p>Your Email: {{packagedetails.email}}</p>
+            <p>Your phone: {{packagedetails.buyerphone}}</p>
+            <p> Package Name: {{packagedetails.package}}</p>
+            <p>Investment: {{packagedetails.investment}}</p>
+
+            <p>Date package buyed: {{packagedetails.date}}</p>
+                {{/if}}
+            <p>Your Email: {{user.email}}</p>
+            <p>Your phone: {{user.phone}}</p>
+            <p> Package Name: no package buyed</p>
+            <p>Investment: None</p>
+
+            <p>Date package buyed: None</p>
+
+           
         </div>
 
-       
+
     </div>
 
 

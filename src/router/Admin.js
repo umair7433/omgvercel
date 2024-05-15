@@ -49,16 +49,20 @@ AdminRoute.post("/adminlogin", async (req, res) => {
 
 
 AdminRoute.get("/admindash", isAuthenticated, async (req, res) => {   
+  try {
+    const Find = await packagesModel.find({ status: true });
 
-  const Find=await packagesModel.find({status:true})
+    // Calculate total income from packages with status: true
+    const formattedIncome = Find.reduce((sum, package) => sum + parseFloat(package.investment), 0).toFixed(2);
+    const income = Number(formattedIncome).toFixed(2);
 
-
-  const formattedIncome = Find.reduce((sum, package) => sum + parseFloat(package.investment), 0).toFixed(2);
-
-  const income = Number(formattedIncome).toFixed(2);
-
-    res.render("admin/admindash.hbs",{income});
+    res.render("admin/admindash.hbs", { income });
+  } catch (error) {
+    console.error("Error fetching packages:", error);
+    res.status(500).send("Internal Server Error");
+  }
 });
+
 
 
 AdminRoute.get("/accounts", isAuthenticated, async (req, res) => { 
@@ -148,26 +152,37 @@ const AssignModel = require("../modle/topicModle");
 AdminRoute.post("/assigntopic", isAuthenticated, async (req, res) => {
   try {
     // Assuming you have some parameters in the request body to update the assignment
-    const { topic} = req.body;
-    const date= new Date()
-    // Update the assignment in the database
-    const updatedAssignment = await AssignModel.findOneAndUpdate(
-      {},
-      { $set: { topic, date } },
-      { new: true } // To return the updated document
-    );
+    const { topic } = req.body;
+    const date = new Date();
 
-    if (!updatedAssignment) {
+    // Check if the topic already exists
+    let existingAssignment = await AssignModel.findOne({ topic });
+
+    if (!existingAssignment) {
+      // If the topic doesn't exist, create a new assignment with the topic and date
+      const newAssignment = new AssignModel({ topic, date });
+      existingAssignment = await newAssignment.save();
+    } else {
+      // If the topic exists, update the assignment in the database
+      existingAssignment = await AssignModel.findOneAndUpdate(
+        { topic },
+        { $set: { date } },
+        { new: true }
+      );
+    }
+
+    if (!existingAssignment) {
       return res.status(404).send("Assignment not found");
     }
 
-    // Send the updated assignment as a response or do any other necessary actions
-    res.redirect("/admindash")
+    // Send the updated or newly created assignment as a response or do any other necessary actions
+    res.redirect("/admindash");
   } catch (error) {
     console.error("Error updating assignment:", error);
     res.status(500).send("Internal Server Error");
   }
 });
+
 
 
 
